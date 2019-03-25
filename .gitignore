@@ -1,0 +1,12 @@
+.coverage
+.noseids
+*.egg-info
+**__pycache__
+**.pytest_cache
+/build
+/dist
+.git
+.ipynb_checkpoints
+*.spec
+*.swp
+*.swo
