@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Mon 25 Mar 2019 06:41:25 PM EDT
+Last Modified : Mon 25 Mar 2019 07:48:41 PM EDT
 Created By : Enrique D. Angola
 """
 
 import pandas as pd
+import numpy as np
 
 class ExcelReader():
     """
@@ -33,8 +34,8 @@ class ExcelReader():
 
     def get_data(self,sheetname):
 
-        self.data = pd.read_excel(self.filename,sheet_name=sheetname)
-        
+        data = pd.read_excel(self.filename,sheet_name=sheetname)
+        self.data = data.drop_duplicates('EmployeeID',keep='last')
         self.null = self._get_null()
         self.empty = self._get_empty()
 
@@ -45,3 +46,7 @@ class ExcelReader():
     def _get_empty(self):
 
         return np.where(self.data.applymap(lambda x: x == ''))
+
+    def _drop_duplicates(data):
+
+        self.data = data.drop_duplicates('EmployeeID',keep='last')
