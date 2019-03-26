@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Mon 25 Mar 2019 07:48:41 PM EDT
+Last Modified : Mon 25 Mar 2019 08:35:20 PM EDT
 Created By : Enrique D. Angola
 """
 
@@ -50,3 +50,8 @@ class ExcelReader():
     def _drop_duplicates(data):
 
         self.data = data.drop_duplicates('EmployeeID',keep='last')
+
+    def bin_data(self,binBy=None,groups=None):
+        key = 'binned_'+binBy
+        self.data[key] = pd.cut(self.data[binBy],groups)
+
