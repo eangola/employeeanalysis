@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Mon 25 Mar 2019 08:35:20 PM EDT
+Last Modified : Tue 26 Mar 2019 07:58:23 PM EDT
 Created By : Enrique D. Angola
 """
 
@@ -32,10 +32,10 @@ class ExcelReader():
         self.null = None
         self.data = None
 
-    def get_data(self,sheetname):
+    def get_data(self,sheetname,primaryKey = 'EmployeeID'):
 
         data = pd.read_excel(self.filename,sheet_name=sheetname)
-        self.data = data.drop_duplicates('EmployeeID',keep='last')
+        self.data = data.drop_duplicates(primaryKey,keep='last')
         self.null = self._get_null()
         self.empty = self._get_empty()
 
