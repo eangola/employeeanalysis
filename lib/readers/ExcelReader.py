@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Tue 26 Mar 2019 07:58:23 PM EDT
+Last Modified : Thu 28 Mar 2019 02:56:29 PM EDT
 Created By : Enrique D. Angola
 """
 
@@ -54,4 +54,14 @@ class ExcelReader():
     def bin_data(self,binBy=None,groups=None):
         key = 'binned_'+binBy
         self.data[key] = pd.cut(self.data[binBy],groups)
+
+    def merge_data(self,dataframe=None,on=None,originalkey = None):
+        
+        if originalkey:
+            self.data = self.data.rename(index=str,columns={originalkey:on})
+
+        self.data = self.data.merge(dataframe,on=on)
+        self.null = self._get_null()
+        self.empty = self._get_empty()
+
 
