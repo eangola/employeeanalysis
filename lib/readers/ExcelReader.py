@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Thu 28 Mar 2019 02:56:29 PM EDT
+Last Modified : Thu 28 Mar 2019 06:42:19 PM EDT
 Created By : Enrique D. Angola
 """
 
 import pandas as pd
 import numpy as np
+import pdb
 
 class ExcelReader():
     """
@@ -31,6 +32,8 @@ class ExcelReader():
         self.empty = None
         self.null = None
         self.data = None
+        self.predictors = None
+        self.target = None
 
     def get_data(self,sheetname,primaryKey = 'EmployeeID'):
 
@@ -64,4 +67,16 @@ class ExcelReader():
         self.null = self._get_null()
         self.empty = self._get_empty()
 
+    def drop_rows(self,key=None,on=None):
 
+        for item in on:
+            self.data = self.data[self.data[key]!= item]
+
+
+    def build_training_data(self,target=None,misc=None):
+
+        self.target = self.data[target]
+        self.predictors = self.data.drop(columns=[target])
+        if misc:
+            self.predictors = self.data.drop(columns=misc)
+        
