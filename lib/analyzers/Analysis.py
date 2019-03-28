@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Created : 26-03-2019
-Last Modified : Thu 28 Mar 2019 05:55:33 PM EDT
+Last Modified : Thu 28 Mar 2019 06:10:00 PM EDT
 Created By : Enrique D. Angola
 """
 from sklearn.model_selection import cross_val_score
@@ -139,8 +139,7 @@ class Analysis():
         if learningCurveOn:
             self.learning_curve(classifiers)
 
-e
-t_feature_importance(self,classifiers):
+    def _plot_feature_importance(self,classifiers):
         """
         This privated method plots the feature importance
         for ensemble methods
