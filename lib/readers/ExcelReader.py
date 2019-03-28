@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Thu 28 Mar 2019 06:42:19 PM EDT
+Last Modified : Thu 28 Mar 2019 06:58:16 PM EDT
 Created By : Enrique D. Angola
 """
 
 import pandas as pd
 import numpy as np
 import pdb
+from sklearn import preprocessing as pp
 
 class ExcelReader():
     """
@@ -76,7 +77,9 @@ class ExcelReader():
     def build_training_data(self,target=None,misc=None):
 
         self.target = self.data[target]
+        lb = pp.LabelBinarizer()
+        self.target = lb.fit_transform(self.target)
         self.predictors = self.data.drop(columns=[target])
         if misc:
-            self.predictors = self.data.drop(columns=misc)
+            self.predictors = self.predictors.drop(columns=misc)
         
