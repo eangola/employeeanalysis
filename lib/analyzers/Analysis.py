@@ -1,30 +1,28 @@
 #!/usr/bin/env python
 """
 Created : 26-03-2019
-Last Modified : Thu 28 Mar 2019 06:10:00 PM EDT
+Last Modified : Thu 28 Mar 2019 09:48:19 PM EDT
 Created By : Enrique D. Angola
 """
 from sklearn.model_selection import cross_val_score
+import numpy as np
+from matplotlib import pylab as plt
+import pandas as pd
+from sklearn import preprocessing
+from sklearn import linear_model
+import pdb
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_curve
+from sklearn.model_selection import StratifiedKFold
+
 
 class Analysis():
     """
-
-
-    Parameters
-    ----------
-
-
-    Returns
-    -------
-
-
-    Examples
-    --------
-    >>>
+    Analysis object - allows ML modelling
 
     """
 
-    def __init__(self,reader,n_jobs = 8):
+    def __init__(self,reader,n_jobs = 16):
         self.reader = reader
         self.njobs = n_jobs
 
@@ -42,10 +40,9 @@ class Analysis():
 
 
     def linear_classifiers(self,alpha='auto',C='auto',gridC = np.logspace(-1,2,50),\
-            grid=np.logspace(1,5,50)):
+            grid=np.logspace(1,5,50),learningCurveOn=False,relevanceOn=True):
         """
         Computes scores for regression using simple algorithms such as
-        linear regression, ridge regression, and simple decission trees.
 
         Parameters
         ----------
@@ -65,19 +62,27 @@ class Analysis():
         self.reader.predictors = preprocessing.scale(self.reader.predictors)
 
         # find alpha for ridge regression using cross validation
-        if alpha == 'auto':
-            alpha = self.gridsearchCV(method=linear_model.Ridge(),grid=grid)
         if C == 'auto':
-            C = self.gridsearchCV(method=linear_model.LogisticRegression(),\
+            C = self.gridsearchCV(method=linear_model.LogisticRegression(solver='lbfgs'),\
                     parameter = 'C', grid=gridC)
 
         #define regressors
-        classifiers = {'lr':linear_model.LogisticRegression(C=C),\
-                'ridge':linear_model.RidgeClassifier(alpha=alpha)}
+        classifiers = {'lr':linear_model.LogisticRegression(C=C,solver='lbfgs')}
 
         #use cross validation to score regressors
         scores = self._score_classifiers(classifiers)
-        self.reader.predictors = 'RELOAD TRAINING DATA'
+
+        if relevanceOn:
+            model = linear_model.LogisticRegression(solver='lbfgs')
+            model.fit(self.reader.predictors,self.reader.target)
+            print(np.std(self.reader.predictors,0)*model.coef_)
+
+
+        if learningCurveOn:
+            self.learning_curve(classifiers)
+
+
+
         return scores
 
     def ensemble_classifiers(self,treesR='auto',trees='auto',maxFeatures='auto',learningRate=0.1,\
@@ -127,10 +132,12 @@ class Analysis():
         classifiers = {'randomf':ensemble.RandomForestClassifier(treesR,max_features=maxFeatures,n_jobs=self.njobs),\
                 'boost':ensemble.AdaBoostClassifier(learning_rate= \
                 learningRate,n_estimators=trees)}
+        classifiersTwo = {'randomf':ensemble.RandomForestClassifier(treesR,max_features=maxFeatures,n_jobs=self.njobs)}
+
 
                 #plot feature importance
         if relevanceOn:
-            self._plot_feature_importance(classifiers)
+            self._plot_feature_importance(classifiersTwo)
 
         if scoreOn:
             scores = self._score_classifiers(classifiers)
@@ -182,7 +189,7 @@ class Analysis():
             pass
         return x
 
-    def learning_curve(self,regressors=None,cv=3,trainSizes = np.linspace(.1,1.0,5)):
+    def learning_curve(self,regressors=None,cv=2,trainSizes = np.linspace(.325,1.0,5)):
 
 
         for name,estimator in regressors.items():
@@ -263,7 +270,7 @@ class Analysis():
         plt.legend(loc="best")
         return plt
 
-core_classifiers(self,regressors=None,cv=3):
+    def _score_classifiers(self,regressors=None,cv=3):
 
         """
         This private method uses k-fold cross-validation to score the regressors.
@@ -342,38 +349,38 @@ core_classifiers(self,regressors=None,cv=3):
         return grid.best_params_[parameter]
 
 
-def plot_confusion_matrix(cm, classes,
-                          normalize=False,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
-    import itertools
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
+    def plot_confusion_matrix(self,cm, classes,
+                              normalize=False,
+                              title='Confusion matrix',
+                              cmap=plt.cm.Blues):
+        """
+        This function prints and plots the confusion matrix.
+        Normalization can be applied by setting `normalize=True`.
+        """
+        import itertools
+        if normalize:
+            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+            print("Normalized confusion matrix")
+        else:
+            print('Confusion matrix')
 
-    print(cm)
+        print(cm)
 
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
+        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.title(title)
+        plt.colorbar()
+        tick_marks = np.arange(len(classes))
+        plt.xticks(tick_marks, classes, rotation=45)
+        plt.yticks(tick_marks, classes)
 
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+        fmt = '.2f' if normalize else 'd'
+        thresh = cm.max() / 2.
+        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+            plt.text(j, i, format(cm[i, j], fmt),
+                     horizontalalignment="center",
+                     color="white" if cm[i, j] > thresh else "black")
 
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+        plt.tight_layout()
+        plt.ylabel('True label')
+        plt.xlabel('Predicted label')
 

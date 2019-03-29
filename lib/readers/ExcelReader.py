@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Created : 25-03-2019
-Last Modified : Thu 28 Mar 2019 06:58:16 PM EDT
+Last Modified : Thu 28 Mar 2019 09:47:32 PM EDT
 Created By : Enrique D. Angola
 """
 
@@ -16,15 +16,11 @@ class ExcelReader():
 
     Parameters
     ----------
-
+    filepath
 
     Returns
     -------
-
-
-    Examples
-    --------
-    >>>
+    None
 
     """
 
@@ -60,7 +56,7 @@ class ExcelReader():
         self.data[key] = pd.cut(self.data[binBy],groups)
 
     def merge_data(self,dataframe=None,on=None,originalkey = None):
-        
+
         if originalkey:
             self.data = self.data.rename(index=str,columns={originalkey:on})
 
@@ -81,5 +77,6 @@ class ExcelReader():
         self.target = lb.fit_transform(self.target)
         self.predictors = self.data.drop(columns=[target])
         if misc:
-            self.predictors = self.predictors.drop(columns=misc)
-        
+            for item in misc:
+                self.predictors = self.predictors.drop(columns=item)
+        self.target = self.target.reshape(len(self.target),)
